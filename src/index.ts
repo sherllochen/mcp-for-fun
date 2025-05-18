@@ -1,9 +1,17 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { ApiClient } from "./api/client.js";
+import { createTransactionsTool } from "./tools/transactions.js";
 
 const NWS_API_BASE = "https://api.weather.gov";
 const USER_AGENT = "weather-app/1.0";
+
+// Create API client instance
+const apiClient = new ApiClient(
+  "https://api.up.com.au/api/v1",
+  process.env.UP_API_TOKEN || "your-api-token-here"
+);
 
 // Create server instance
 const server = new McpServer({
@@ -213,6 +221,25 @@ server.tool(
         ],
       };
     },
+  );
+
+  // Register transactions tool
+  const transactionsTool = createTransactionsTool(apiClient);
+  server.tool(
+    transactionsTool.name,
+    transactionsTool.description,
+    transactionsTool.schema,
+    // transactionsTool.handler
+    async () => {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Transactions tool not implemented`,
+          },
+        ],
+      };
+    }
   );
 
   async function main() {
